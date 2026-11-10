@@ -12,8 +12,22 @@ app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
 app.use(express.static('public'))
-const JWT_PASSWORD = process.env.JWT_SENHA
+const JWT_SECRET = process.env.JWT_SENHA
 const SALT = await bcrypt.genSalt(10)
+
+function autenticarToken (req, res, next){
+    const token = req.cookies.token
+    if(!token){
+        return res.status(401).json({error: "Acesso nigado."})
+    }
+    try{
+        const usuarioJWT = jwt.verify(token, JWT_SECRET)
+        req.usuarioJWT = usuarioJWT;
+        return next()
+    } catch(err){
+        return res.status(403).json("Erro ao formatar token.")
+    }
+}
 
 app.get('/', (req, res) =>{
     res.redirect('/login.html')
